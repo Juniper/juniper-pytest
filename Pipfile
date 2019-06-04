@@ -1,0 +1,33 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+cookiecutter = "*"
+tox = "*"
+
+[packages]
+junos-eznc = "*"
+jsnapy = "*"
+napalm = "*"
+pexpect = "*"
+pytest = "*"
+pytest-csv = "*"
+pytest-html = "*"
+pytest-yaml = "*"
+pytest-json = "*"
+pytest-colordots = "*"
+pytest-pep8 = "*"
+pytest-variables = "*"
+pytest-profiling = "*"
+pytest-progress = "*"
+pytest-shutil = "*"
+pytest-ansible = "*"
+pytest-atomic = "*"
+pytest-xdist = "*"
+ixnetwork = "*"
+ansible = "==2.7.10"
+
+[requires]
+python_version = "3"

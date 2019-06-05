@@ -19,7 +19,7 @@ pytest-yaml = "*"
 pytest-json = "*"
 pytest-colordots = "*"
 pytest-pep8 = "*"
-pytest-variables = "*"
+pytest-variables = {extras = ["yaml"],version = "*"}
 pytest-profiling = "*"
 pytest-progress = "*"
 pytest-shutil = "*"
@@ -28,6 +28,12 @@ pytest-atomic = "*"
 pytest-xdist = "*"
 ixnetwork = "*"
 ansible = "==2.7.10"
+pytest-bdd = "*"
+pytest-cov = "*"
+pytest-flakes = "*"
 
 [requires]
-python_version = "3"
+# Python 3.6 is required (and installed in the container)
+# but don't check for it in case host does not have it.
+# Use at your own risk!
+#python_version = "3.6"

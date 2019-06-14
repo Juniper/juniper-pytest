@@ -1,6 +1,13 @@
+import pytest
+
 def inc(x):
     return x + 1
 
-# By default, only functions named test_ get executed.
+# All methods named "test_*" will be executed.
 def test_answer():
     assert inc(3) == 4
+
+# This test is expected to fail.
+@pytest.mark.xfail(strict=True)
+def test_answer():
+    assert inc(3) == 5

@@ -11,7 +11,7 @@
 #
 # *******************>
 
-.PHONY: clean build test docker-test docker-build docker-shell version python-version alpine-version ansible-version junos-eznc-version jsnapy-version
+.PHONY: clean build test docker-test docker-shell version python-version alpine-version ansible-version junos-eznc-version jsnapy-version
 
 # Execute tests (dev environment)
 test: .venv
@@ -25,6 +25,7 @@ export PIPENV_VENV_IN_PROJECT=1
 # Remove all files ignored by git (not untracked/new).
 clean:
 	git clean -dXf
+	rm -rf .venv
 
 # Build the docker container
 PYTEST_DOCKER_REGISTRY=ps-docker-internal.artifactory.aslab.juniper.net
@@ -48,7 +49,7 @@ module_version = $(call docker-run,pip,list) | grep '^$(1) ' | awk '{print $$2}'
 
 # Version of this container.  Used to tag the image built in CI.
 version:
-	@echo 0.1.0
+	@echo 0.1.1
 
 python-version:
 	@$(call docker-run,python,--version) | awk '{print $$2}'

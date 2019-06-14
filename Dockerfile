@@ -21,21 +21,21 @@ ENV PYTHONUNBUFFERED=1
 # No .pyc files to save space and avoid writes to disk
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Install python components in a virtual environment.
-ADD Pipfile Pipfile.lock ./
-
-# Build/install all python modules into /.venv
+# Install python components into /.venv
+WORKDIR /
+ADD Pipfile Pipfile.lock /
 RUN pipenv install
 
-# Remove *.pyc files
-RUN find /.venv -name __pycache__ -type d | xargs rm -r
+# Remove *.pyc (Python byte-code cache) files
+RUN find .venv -name __pycache__ -type d | xargs rm -rf
+# Remove the documentation from the container
+RUN find .venv -name docs -type d | xargs rm -rf
 
-# Build a tight python image.  Should be same image as used to build.
+# Build a tight python image.  Should be same base image as used to build.
 FROM python:3.6-alpine3.9
 
 # Install other stuff we need
-RUN apk add --no-cache libxslt libxml2 libffi openssl curl \
-    ca-certificates openssl \
+RUN apk add --no-cache libxslt libxml2 libffi curl ca-certificates openssl \
     && rm -rf /source/* \
     && rm -rf /var/cache/apk/*
 
@@ -52,9 +52,13 @@ ENV PATH=/.venv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr
 VOLUME /tests
 WORKDIR /tests
 
-# Copy sample test into work directory.
+# Copy sample tests into test directory.
 # This is hidden if a test volume is mounted instead.
 ADD tests /tests
 
+# Where we expect to report test results.
+# TODO: ADD...
+
 # By default, run through the pipenv.
-ENTRYPOINT ["pytest"]
+# Should discover and execute the sample tests.
+ENTRYPOINT ["py.test"]

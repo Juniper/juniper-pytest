@@ -11,31 +11,45 @@
 @Library('PS-Shared-libs') _
 
 node('docker') {
-    def version
+    def imageTag
     
     stage('Checkout'){
         checkout scm
     }
+
+    stage('Test image'){
+        // Validate the image
+        sh 'make docker-test'
+    }
+
     stage('Build image'){
         // Get the current version of container
         version = sh(returnStdout: true, script: 'make version').trim()
+
+        // Code version
         commit = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+        branch = "${env.SOURCE_BRANCH}".replaceAll('refs/heads/','')
+        
+        // Use the branch as the tag, unless the branch is master
+        imageTag = (branch != 'master') ? branch : version
+
         // Get information from the container
         def pythonVersion = sh(returnStdout: true, script: 'make python-version').trim()
         def alpineVersion = sh(returnStdout: true, script: 'make alpine-version').trim()
         def ansibleVersion = sh(returnStdout: true, script: 'make ansible-version').trim()
         def junosEzncVersion = sh(returnStdout: true, script: 'make junos-eznc-version').trim()
         def jsnapyVersion = sh(returnStdout: true, script: 'make jsnapy-version').trim()
+
         // Get current date
-        def now = new Date()
+        def now = new Date().format("yyyy-MM-dd", TimeZone.getTimeZone('UTC'))
+
         // Build the image with label metadata
         dockerImage action: 'build', 
-                    imageTag: version,
                     buildArgs: " --label net.juniper.image.release=${version}" +
-                                " --label net.juniper.image.branch=" + "${env.SOURCE_BRANCH}".replaceAll('refs/heads/','') +
+                                " --label net.juniper.image.branch=${branch}" +
                                 " --label net.juniper.image.commit=${commit}" +
-                                " --label net.juniper.image.issue.date=" + now.format("yyyy-MM-dd", TimeZone.getTimeZone('UTC')) +
-                                " --label net.juniper.image.create.date=" + now.format("yyyy-MM-dd", TimeZone.getTimeZone('UTC')) +
+                                " --label net.juniper.image.issue.date=${now}" +
+                                " --label net.juniper.image.create.date=${now}" +
                                 ' --label net.juniper.image.mantainer="Juniper Networks, Inc."' +
                                 " --label net.juniper.image.python-version=${pythonVersion}" +
                                 " --label net.juniper.image.alpine-version=${alpineVersion}" +
@@ -45,19 +59,15 @@ node('docker') {
                                 ' . '
     }
 
-    stage('Test image'){
-        // Validate the image
-        sh 'make docker-test'
-    }
-
     stage('Push image'){
-        dockerImage action: 'push'
+        // Push the build image
+        dockerImage action: 'push', imageTag: imageTag
     }
 
     stage('Push to Docker Hub'){
         // Not actually rebuilding, due to cache. Using for the purpose of retagging.
         dockerImage action: 'build', tag: 'juniperps/pytest'
         // Using ssteiner's DockerHub credentials (ntwrkguru)
-        dockerImage action: 'push', imageTag: version, url: '', credentials: '1a7b4d9f-8b15-4d93-beb9-8d34f010f543'
+        dockerImage action: 'push', imageTag: imageTag, url: '', credentials: '1a7b4d9f-8b15-4d93-beb9-8d34f010f543'
     }
 }

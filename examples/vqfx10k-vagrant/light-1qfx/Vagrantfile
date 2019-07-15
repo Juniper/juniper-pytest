@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+    config.ssh.insert_key = false
+
+    ##########################
+    ## Routing Engine  #######
+    ##########################
+    config.vm.define "vqfx" do |vqfx|
+        vqfx.vm.hostname = "vqfx"
+        vqfx.vm.box = 'juniper/vqfx10k-re'
+
+        # VM can be really slow unless COM1 is connected to something.
+        Vagrant::Util::Platform.windows? ? ( re_log = "NUL" ) : ( re_log = "/dev/null" )
+        vqfx.vm.provider "virtualbox" do |v|
+            v.customize ["modifyvm", :id, "--uartmode1", "file", re_log]
+        end
+
+        # DO NOT REMOVE / NO VMtools installed
+        vqfx.vm.synced_folder '.', '/vagrant', disabled: true
+
+        # Management port (em1 / em2)
+        vqfx.vm.network 'private_network', auto_config: false, nic_type: '82540EM', virtualbox__intnet: "reserved-bridge"
+        vqfx.vm.network 'private_network', auto_config: false, nic_type: '82540EM', intnet: "reserved-bridge"
+
+        # (em3  em4)
+        (1..2).each do |seg_id|
+            vqfx.vm.network 'private_network', auto_config: false, nic_type: '82540EM', intnet: "segment"
+        end
+    end
+end

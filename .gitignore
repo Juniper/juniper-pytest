@@ -88,3 +88,11 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Pytest files
+.pytest_cache
+
+# Ansible
+*.retry
+.ansible
+.ssh

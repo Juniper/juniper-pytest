@@ -91,4 +91,11 @@ ENV/
 
 # PyCharm
 .idea
+
+# Pytest files
 .pytest_cache
+images/
+docs/
+
+# Examples are run on the host
+examples/

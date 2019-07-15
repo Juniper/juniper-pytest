@@ -15,9 +15,6 @@ pexpect = "*"
 pytest = "*"
 pytest-csv = "*"
 pytest-html = "*"
-pytest-yaml = "*"
-pytest-colordots = "*"
-pytest-progress = "*"
 pytest-shutil = "*"
 pytest-atomic = "*"
 pytest-xdist = "*"
@@ -28,13 +25,16 @@ pytest-profiling = "*"
 pytest-cov = "*"
 pytest-variables = {extras = ["yaml"],version = "*"}
 pytest-ansible = "*"
-ansible = "==2.7.10"
+ansible = "*"
 ixnetwork-restpy = "*"
 stcrestclient = "*"
 sshtunnel = "*"
+pytest-json-report = "*"
+napalm-ansible = "*"
+jxmlease = "*"
+pytest-ansible-playbook-runner = "*"
 
 [requires]
-# Python 3.6 is required (and installed in the container)
-# but don't check for it in case host does not have it.
-# Use at your own risk!
-#python_version = "3.6"
+# To see the current tested version of Python, see the Dockerfile.
+# Don't check for it in case host does not have it (hopefully it has a newer/better version?).
+#python_version = "3.7"

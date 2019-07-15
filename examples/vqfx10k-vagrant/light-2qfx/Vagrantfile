@@ -1,0 +1,55 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+## Generate a unique ID for this project
+UUID = "PNONRD"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+    config.ssh.insert_key = false
+
+    (1..2).each do |id|
+        re_name  = ( "vqfx" + id.to_s ).to_sym
+
+        ##########################
+        ## Routing Engine  #######
+        ##########################
+        config.vm.define re_name do |vqfx|
+            vqfx.vm.hostname = "vqfx#{id}"
+            vqfx.vm.box = 'juniper/vqfx10k-re'
+
+            # VM can be really slow unless COM1 is connected to something.
+            Vagrant::Util::Platform.windows? ? ( re_log = "NUL" ) : ( re_log = "/dev/null" )
+            vqfx.vm.provider "virtualbox" do |v|
+                v.customize ["modifyvm", :id, "--uartmode1", "file", re_log]
+            end
+
+            # DO NOT REMOVE / NO VMtools installed
+            vqfx.vm.synced_folder '.', '/vagrant', disabled: true
+
+            # Management port (em1 / em2)
+            vqfx.vm.network 'private_network', auto_config: false, nic_type: '82540EM', virtualbox__intnet: "#{UUID}_vqfx_internal_#{id}"
+            vqfx.vm.network 'private_network', auto_config: false, nic_type: '82540EM', virtualbox__intnet: "#{UUID}_reserved-bridge"
+
+            # (em3 -- em7)
+            (1..5).each do |seg_id|
+                vqfx.vm.network 'private_network', auto_config: false, nic_type: '82540EM', virtualbox__intnet: "#{UUID}_seg#{seg_id}"
+            end
+        end
+    end
+
+    ##############################
+    ## Box provisioning    #######
+    ##############################
+    if !Vagrant::Util::Platform.windows?
+        config.vm.provision "ansible" do |ansible|
+            ansible.groups = {
+                "vqfx10k" => ["vqfx1", "vqfx2" ],
+                "all:children" => ["vqfx10k"]
+            }
+            ansible.playbook = "pb.conf.all.commit.yaml"
+        end
+    end
+end

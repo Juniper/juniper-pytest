@@ -93,7 +93,7 @@ jsnapy-version:
 VQFX10K_VAGRANT_REMOTE ?= https://github.com/Juniper/vqfx10k-vagrant.git
 .PHONY: update-vqfx10k-vagrant
 update-vqfx10k-vagrant:
-	git subtree pull -q --prefix examples/vqfx10k-vagrant $(VQFX10K_VAGRANT_REMOTE) master --squash
+	git pull --squash -s subtree -Xsubtree=examples/vqfx10k-vagrant/ --allow-unrelated-histories -Xtheirs $(VQFX10K_VAGRANT_REMOTE) master
 
 vagrant_base_dir := $(CURDIR)/examples/vqfx10k-vagrant
 

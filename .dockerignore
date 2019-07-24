@@ -96,6 +96,11 @@ ENV/
 .pytest_cache
 images/
 docs/
+*.prof
 
 # Examples are run on the host
 examples/
+assets
+report.html
+report.csv
+report.json

@@ -45,10 +45,6 @@ To contribute
 - Fork this repository
 - Send a merge request
 
-### Guidelines to create a new example
-
-TODO
-
 ### How to provide feedback or report an issue
 
 The best solution to provide feedback is to open a new issue on the [git tracker](https://github.com/Juniper/vqfx10k-vagrant/issues) associated with this repo.  

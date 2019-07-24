@@ -91,6 +91,11 @@ ENV/
 
 # Pytest files
 .pytest_cache
+assets
+report.html
+report.csv
+report.json
+*.prof
 
 # Ansible
 *.retry

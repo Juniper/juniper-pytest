@@ -21,8 +21,6 @@ pytest-xdist = "*"
 pytest-bdd = "*"
 pytest-pycodestyle = "*"
 pytest-flakes = "*"
-pytest-profiling = "*"
-pytest-cov = "*"
 pytest-variables = {extras = ["yaml"],version = "*"}
 pytest-ansible = "*"
 ansible = "*"
@@ -33,6 +31,8 @@ pytest-json-report = "*"
 napalm-ansible = "*"
 jxmlease = "*"
 pytest-ansible-playbook-runner = "*"
+pytest-cov = "*"
+pytest-excel = "*"
 
 [requires]
 # To see the current tested version of Python, see the Dockerfile.

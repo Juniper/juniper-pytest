@@ -1,5 +1,5 @@
 from jnpr.junos import Device
-
+from jnpr.junos.op.ethport import EthPortTable
 
 # Get all the host variables
 def get_host_vars(hosts, host_name):
@@ -7,15 +7,16 @@ def get_host_vars(hosts, host_name):
 
 
 # Return only variables needed to connect to Junos device
-def dict_host_connection_vars(host_vars):
+def dict_host_conn(host_vars):
     # strip leading 'ansible_' from the variable names
     return {k[len('ansible_'):]: v for (k, v) in host_vars.items() if k in
-            ["ansible_host", "ansible_port", "ansible_user", "ansible_password", "ansible_ssh_private_key_file"]}
+            ["ansible_host", "ansible_port", "ansible_user",
+             "ansible_password", "ansible_ssh_private_key_file"]}
 
 
 # Get only the host connection variables
-def get_host_connection_vars(hosts, host_name):
-    return dict_host_connection_vars(get_host_vars(hosts, host_name))
+def get_host_conn(hosts, host_name):
+    return dict_host_conn(get_host_vars(hosts, host_name))
 
 
 # Validate that the host entries looks correct
@@ -45,8 +46,8 @@ def test_get_inventory(ansible_adhoc):
 
 def test_junos_alarms(ansible_adhoc):
     hosts = ansible_adhoc()
-    assert_no_junos_alarms(**get_host_connection_vars(hosts, 'vqfx1'))
-    assert_no_junos_alarms(**get_host_connection_vars(hosts, 'vqfx2'))
+    assert_no_junos_alarms(**get_host_conn(hosts, 'vqfx1'))
+    assert_no_junos_alarms(**get_host_conn(hosts, 'vqfx2'))
 
 
 def assert_no_junos_alarms(**connection_args):
@@ -54,26 +55,42 @@ def assert_no_junos_alarms(**connection_args):
 
         # Check for chassis alarms
         chassis_alarms = dev.rpc.get_alarm_information()
-        assert(len(chassis_alarms.xpath('//alarm-information/alarm-summary/no-active-alarms')) == 1)
+        assert(len(chassis_alarms.xpath(
+                '//alarm-information/alarm-summary/no-active-alarms')) == 1)
 
         # Check for system alarms
         system_alarms = dev.rpc.get_system_alarm_information()
-        assert(len(system_alarms.xpath('//alarm-information/alarm-summary/no-active-alarms')) == 1)
+        assert(len(system_alarms.xpath(
+                '//alarm-information/alarm-summary/no-active-alarms')) == 1)
 
+
+def assert_interfaces_up(conn, interface):
+    with Device(**conn) as dev:
+        eths = EthPortTable(dev)
+        eths.get(interface)
+        for eth in eths:
+            assert(eth.oper == 'up' and eth.admin == 'up')
 
 def test_interfaces_up(ansible_adhoc):
     hosts = ansible_adhoc()
 
-    vqfx1_connection_vars = get_host_connection_vars(hosts, 'vqfx1')
-    vqfx2_connection_vars = get_host_connection_vars(hosts, 'vqfx2')
+    vqfx1_conn = get_host_conn(hosts, 'vqfx1')
+    assert_interfaces_up(vqfx1_conn, 'em*')
 
-    with Device(**vqfx1_connection_vars) as vqfx1:
-        # TODO
+    vqfx2_conn = get_host_conn(hosts, 'vqfx2')
+    assert_interfaces_up(vqfx2_conn, 'em*')
 
-        with Device(**vqfx2_connection_vars) as vqfx2:
-                # TODO
-                return
+
+def assert_junos_version(conn, version):
+    with Device(**conn) as dev:
+        assert(dev.facts['version_info'].major >= version)
 
 
 def test_junos_version(ansible_adhoc):
-    return
+    hosts = ansible_adhoc()
+
+    vqfx1_conn = get_host_conn(hosts, 'vqfx1')
+    assert_junos_version(vqfx1_conn, (17,4))
+
+    vqfx2_conn = get_host_conn(hosts, 'vqfx2')
+    assert_junos_version(vqfx2_conn, (17,4))

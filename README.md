@@ -1,33 +1,33 @@
 # __pytest__ Container
 
-- [__pytest__ Container](#pytest-Container)
-  - [__pytest__ Features](#pytest-Features)
-    - [Packaged pytest plugins](#Packaged-pytest-plugins)
-      - [Test Fixtures and Styles](#Test-Fixtures-and-Styles)
-      - [Reporting](#Reporting)
-      - [Test Execution](#Test-Execution)
-    - [Packaged python3 modules](#Packaged-python3-modules)
-  - [__Ansible__ Features](#Ansible-Features)
-  - [__Usage__](#Usage)
-    - [Mounting Tests and Output](#Mounting-Tests-and-Output)
-    - [Forking the Container](#Forking-the-Container)
-    - [Organizing Tests](#Organizing-Tests)
-    - [Development Environment](#Development-Environment)
-    - [__Examples__](#Examples)
-      - [Setup: Installing a VSRX Topology for Demo purposes](#Setup-Installing-a-VSRX-Topology-for-Demo-purposes)
-        - [Supported Vagrant Topologies](#Supported-Vagrant-Topologies)
-        - [Usage](#Usage)
-      - [PyEZ Connectivity Testing](#PyEZ-Connectivity-Testing)
-      - [JSNAPy Audit/Diff](#JSNAPy-AuditDiff)
-      - [Reporting Examples](#Reporting-Examples)
-        - [CSV](#CSV)
-        - [HTML](#HTML)
-        - [JSON](#JSON)
-        - [Coverage](#Coverage)
-        - [Profiling](#Profiling)
-        - [Style](#Style)
-        - [Static Analysis](#Static-Analysis)
-      - [Packaging and Distributing pytest Tests](#Packaging-and-Distributing-pytest-Tests)
+- [__pytest__ Container](#pytest-container)
+  - [__pytest__ Features](#pytest-features)
+    - [Packaged pytest plugins](#packaged-pytest-plugins)
+      - [Test Fixtures and Styles](#test-fixtures-and-styles)
+      - [Reporting](#reporting)
+      - [Test Execution](#test-execution)
+    - [Packaged python3 modules](#packaged-python3-modules)
+  - [__Ansible__ Features](#ansible-features)
+  - [__Usage__](#usage)
+    - [Mounting Tests and Output](#mounting-tests-and-output)
+    - [Forking the Container](#forking-the-container)
+    - [Organizing Tests](#organizing-tests)
+    - [Development Environment](#development-environment)
+    - [__Examples__](#examples)
+      - [Setup: Installing a VSRX Topology for Demo purposes](#setup-installing-a-vsrx-topology-for-demo-purposes)
+        - [Supported Vagrant Topologies](#supported-vagrant-topologies)
+        - [Usage](#usage)
+      - [PyEZ Connectivity Testing](#pyez-connectivity-testing)
+      - [JSNAPy Audit/Diff](#jsnapy-auditdiff)
+      - [Reporting Examples](#reporting-examples)
+        - [CSV](#csv)
+        - [HTML](#html)
+        - [JSON](#json)
+        - [Coverage](#coverage)
+        - [Test Exectution Time](#test-exectution-time)
+        - [Style](#style)
+        - [Static Analysis](#static-analysis)
+      - [Packaging and Distributing pytest Tests](#packaging-and-distributing-pytest-tests)
 
 Container for executing pytest tests and Ansible roles on network devices, especially (our favorite) Juniper network devices.
 
@@ -66,9 +66,9 @@ This container packs the plugins and libraries that are well-supported and parti
 | [pytest-html](https://pypi.org/project/pytest-html/1.6/)                                            | Generates a HTML report for the test results.                                 |
 | [pytest-json-report](https://github.com/numirias/pytest-json-report)                                | Creates test reports as JSON.                                                 |
 | [pytest-cov](https://github.com/pytest-dev/pytest-cov/blob/master/README.rst)                       | Produces coverage reports.                                                    |
-| [pytest-profiling](https://github.com/manahl/pytest-plugins/blob/master/pytest-profiling/README.md) | Profiling plugin with tabular and heath graph output.                         |
 | [pytest-pycodestyle](https://github.com/henry0312/pytest-codestyle/blob/master/README.md)           | Style checker for pytest code.                                                |
 | [pytest-flakes](https://github.com/fschulze/pytest-flakes/blob/master/README.rst)                   | Static analyzer for pytest code  to check for coding bugs prior to execution. |
+| [pytest-excel](https://github.com/ssrikanta/pytest-excel/blob/master/README.rst)                         | Excel output for pytest.                                                        |
 
 #### Test Execution
 
@@ -209,16 +209,133 @@ make destroy-light-2qfx
 
 ##### CSV
 
+``` bash
+$ pipenv run py.test --csv=report.csv
+...
+$ cat report.csv
+id,module,name,file,doc,markers,status,message,duration
+examples/test_2qfx.py::test_get_inventory,examples.test_2qfx,test_get_inventory,examples/test_2qfx.py,,,passed,,0.11594510078430176
+examples/test_2qfx.py::test_junos_alarms,examples.test_2qfx,test_junos_alarms,examples/test_2qfx.py,,,passed,,1.038262128829956
+examples/test_2qfx.py::test_interfaces_up,examples.test_2qfx,test_interfaces_up,examples/test_2qfx.py,,,passed,,0.4928560256958008
+examples/test_2qfx.py::test_junos_version,examples.test_2qfx,test_junos_version,examples/test_2qfx.py,,,passed,,0.0002608299255371094
+```
+
 ##### HTML
+
+By default, the style.css is generated into an ```assets``` folder in the same directory as the HTML report.  If you don't like that, use the ```--self-contained-html``` flag.
+
+``` bash
+$ pipenv run py.test --html=report.html  --self-contained--html
+```
+![pytest HTML report](images/report-html.png)
 
 ##### JSON
 
+The JSON report will dump out a JSON data blob that contain the results of all individual tests and what was logged.
+
+``` bash
+$ pipenv run py.test --json-report --json-report-file=report.json
+...
+$ jq .summary report.json
+{
+  "passed": 4,
+  "total": 4
+}
+```
+
+There is also a ```--json-report-summary``` option to only indicate if the entire suite passed.
+
 ##### Coverage
 
-##### Profiling
+There are a variety of code coverage options.  Just specify a path to report code coverage on, and a report type.
+
+``` bash
+$ pipenv run py.test --cov=examples --cov-report=term --cov-branch
+...
+---------- coverage: platform darwin, python 3.7.4-final-0 -----------
+Name                    Stmts   Miss Branch BrPart  Cover
+---------------------------------------------------------
+examples/test_2qfx.py      37      0      2      0   100%
+```
+
+##### Test Exectution Time
+
+Use the ```---durations=0``` flag to make pytest report all test durations.  You can pass it a number to say the minimum slowest test you want the duration to be reported for.
+
+``` bash
+$ pipenv run py.test --durations=0
+...
+========================================= slowest test durations =========================================
+1.00s call     examples/test_2qfx.py::test_junos_alarms
+0.48s call     examples/test_2qfx.py::test_interfaces_up
+0.16s call     examples/test_2qfx.py::test_get_inventory
+
+(0.00 durations hidden.  Use -vv to show these durations.)
+======================================== 4 passed in 2.05 seconds ========================================
+```
 
 ##### Style
 
+It's highly recommended that you validate your code style during test execution to avoid errors.
+
+``` bash
+$ pipenv run py.test --codestyle
+============================================= test session starts ==============================================
+platform darwin -- Python 3.7.4, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
+ansible: 2.8.2
+rootdir: /Users/ejacques/projects/Foundational/pytest, inifile: pytest.ini, testpaths: examples
+plugins: bdd-3.1.1, xdist-1.29.0, forked-1.0.2, flakes-4.0.0, csv-2.0.2, atomic-2.0.0, shutil-1.7.0, ansible-2.1.1, variables-1.7.1, ansible-playbook-runner-0.0.2, pycodestyle-1.4.0, cov-2.7.1, html-1.21.1, profiling-1.7.0, json-report-1.1.0, metadata-1.8.0
+collected 5 items                                                                                              
+
+examples/test_2qfx.py FAILED                                                                             [ 20%]
+examples/test_2qfx.py::test_get_inventory PASSED                                                         [ 40%]
+examples/test_2qfx.py::test_junos_alarms PASSED                                                          [ 60%]
+examples/test_2qfx.py::test_interfaces_up PASSED                                                         [ 80%]
+examples/test_2qfx.py::test_junos_version PASSED                                                         [100%]
+
+=================================================== FAILURES ===================================================
+______________________________________________ pycodestyle-check _______________________________________________
+/Users/ejacques/projects/Foundational/pytest/examples/test_2qfx.py:13:80: E501 line too long (113 > 79 characters)
+            ["ansible_host", "ansible_port", "ansible_user", "ansible_password", "ansible_ssh_private_key_file"]}
+                                                                               ^
+/Users/ejacques/projects/Foundational/pytest/examples/test_2qfx.py:57:80: E501 line too long (100 > 79 characters)
+        assert(len(chassis_alarms.xpath('//alarm-information/alarm-summary/no-active-alarms')) == 1)
+                                                                               ^
+/Users/ejacques/projects/Foundational/pytest/examples/test_2qfx.py:61:80: E501 line too long (99 > 79 characters)
+        assert(len(system_alarms.xpath('//alarm-information/alarm-summary/no-active-alarms')) == 1)
+                                                                               ^
+
+====================================== 1 failed, 4 passed in 1.87 seconds ======================================
+```
+
 ##### Static Analysis
 
+Static analysis can also be run to check for potentially problematic code:
+
+``` bash
+$ pipenv run py.test --flakes
+============================================= test session starts =============================================
+platform darwin -- Python 3.7.4, pytest-5.0.1, py-1.8.0, pluggy-0.12.0
+ansible: 2.8.2
+rootdir: /Users/ejacques/projects/Foundational/pytest, inifile: pytest.ini, testpaths: examples
+plugins: bdd-3.1.1, xdist-1.29.0, forked-1.0.2, flakes-4.0.0, csv-2.0.2, atomic-2.0.0, shutil-1.7.0, ansible-2.1.1, variables-1.7.1, ansible-playbook-runner-0.0.2, pycodestyle-1.4.0, cov-2.7.1, html-1.21.1, profiling-1.7.0, json-report-1.1.0, metadata-1.8.0
+collected 5 items                                                                                             
+
+examples/test_2qfx.py FAILED                                                                            [ 20%]
+examples/test_2qfx.py::test_get_inventory PASSED                                                        [ 40%]
+examples/test_2qfx.py::test_junos_alarms PASSED                                                         [ 60%]
+examples/test_2qfx.py::test_interfaces_up PASSED                                                        [ 80%]
+examples/test_2qfx.py::test_junos_version PASSED                                                        [100%]
+
+================================================== FAILURES ===================================================
+_______________________________________________ pyflakes-check ________________________________________________
+/Users/ejacques/projects/Foundational/pytest/examples/test_2qfx.py:70: UnusedVariable
+local variable 'vqfx1' is assigned to but never used
+/Users/ejacques/projects/Foundational/pytest/examples/test_2qfx.py:73: UnusedVariable
+local variable 'vqfx2' is assigned to but never used
+===================================== 1 failed, 4 passed in 1.90 seconds ======================================
+```
+
 #### Packaging and Distributing pytest Tests
+
+Since the test suite is just Python code, you can simply package up a distribute some tests or common test utilities as a Python module.  For that purpose, the [cookiecutter](https://cookiecutter.readthedocs.io/en/latest/tutorial1.html#step-1-generate-a-python-package-project) project to easily generate a Python Package project.

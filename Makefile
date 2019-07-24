@@ -12,7 +12,7 @@
 # *******************>
 
 # Container version
-VERSION := 0.1.2
+VERSION := 1.0.0
 
 # Execute tests (dev environment)
 .PHONY: test
@@ -45,6 +45,7 @@ clean:
 PYTEST_DOCKER_REGISTRY=ps-docker-internal.artifactory.aslab.juniper.net
 .PHONY: build
 build:
+	git clean -dXf tests
 	docker build -t $(PYTEST_DOCKER_REGISTRY)/pytest .
 
 # Execute tests in a docker container

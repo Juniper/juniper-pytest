@@ -1,5 +1,20 @@
+#!env python3
+# <*******************
+#
+# Copyright 2019 Juniper Networks, Inc. All rights reserved.
+# Licensed under the Juniper Networks Script Software License (the "License").
+# You may not use this script file except in compliance with the License, which
+# is located at http://www.juniper.net/support/legal/scriptlicense/
+# Unless required by applicable law or otherwise agreed to in writing by the
+# parties, software distributed under the License is distributed on an "AS IS"
+# BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+#
+# ******************
+
 from jnpr.junos import Device
 from jnpr.junos.op.ethport import EthPortTable
+
 
 # Get all the host variables
 def get_host_vars(hosts, host_name):
@@ -71,6 +86,7 @@ def assert_interfaces_up(conn, interface):
         for eth in eths:
             assert(eth.oper == 'up' and eth.admin == 'up')
 
+
 def test_interfaces_up(ansible_adhoc):
     hosts = ansible_adhoc()
 
@@ -90,7 +106,7 @@ def test_junos_version(ansible_adhoc):
     hosts = ansible_adhoc()
 
     vqfx1_conn = get_host_conn(hosts, 'vqfx1')
-    assert_junos_version(vqfx1_conn, (17,4))
+    assert_junos_version(vqfx1_conn, (17, 4))
 
     vqfx2_conn = get_host_conn(hosts, 'vqfx2')
-    assert_junos_version(vqfx2_conn, (17,4))
+    assert_junos_version(vqfx2_conn, (17, 4))

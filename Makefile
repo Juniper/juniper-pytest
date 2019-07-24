@@ -203,7 +203,7 @@ vagrant_ansible_inventory = $(vagrant_base_dir)/$(1)/.vagrant/provisioners/ansib
 
 # Determine topology (e.g.- light-2qfx) from the ansible inventory file
 # $(1): Path to Ansible inventory file
-vagrant_topology = $(shell echo $(1) | awk -F/ '{topology=NF-3; print $$topology}')
+vagrant_topology = $(shell echo $(1) | awk -F/ '{topology=NF-5; print $$topology}')
 
 # Make any vagrant_ansible_inventory:
 %/vagrant_ansible_inventory:

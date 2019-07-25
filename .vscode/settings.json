@@ -5,4 +5,5 @@
     "python.testing.pytestEnabled": true,
     "python.pythonPath": "${workspaceFolder}/.venv/bin/python3",
     "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
+    "python.jediEnabled": false,
 }

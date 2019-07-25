@@ -101,3 +101,6 @@ report.json
 *.retry
 .ansible
 .ssh
+
+# Mac junk
+.DS_Store

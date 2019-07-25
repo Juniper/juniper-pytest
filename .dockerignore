@@ -104,3 +104,6 @@ assets
 report.html
 report.csv
 report.json
+
+# Mac junk
+.DS_Store

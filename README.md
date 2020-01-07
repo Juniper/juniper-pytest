@@ -338,4 +338,4 @@ local variable 'vqfx2' is assigned to but never used
 
 #### Packaging and Distributing pytest Tests
 
-Since the test suite is just Python code, you can simply package up a distribute some tests or common test utilities as a Python module.  For that purpose, the [cookiecutter](https://cookiecutter.readthedocs.io/en/latest/tutorial1.html#step-1-generate-a-python-package-project) project to easily generate a Python Package project.
+Since the test suite is just Python code, you can simply package up tests or common test utilities as a Python module.  For that purpose, the [cookiecutter](https://cookiecutter.readthedocs.io/en/latest/tutorial1.html#step-1-generate-a-python-package-project) project is available to easily generate a Python Package project.
